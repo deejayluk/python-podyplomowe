@@ -727,6 +727,77 @@ with open("data.json", "r", encoding="utf-8") as f:
     data = json.load(f)
 ```
 
+### BONUS: @classmethod - alternatywny konstruktor
+
+Zanim przejdziemy do serializacji, musimy zrozumieć `@classmethod`.
+
+**Trzy rodzaje metod w klasie:**
+
+```python
+class Pizza:
+    count = 0  # Zmienna klasowa (wspólna dla wszystkich)
+
+    def __init__(self, name, price):
+        self.name = name      # Zmienna instancji
+        self.price = price
+        Pizza.count += 1
+
+    # 1. Zwykła metoda - pierwszy argument to instancja (self)
+    def describe(self):
+        return f"{self.name}: {self.price} zł"
+
+    # 2. @classmethod - pierwszy argument to KLASA (cls), nie instancja!
+    @classmethod
+    def get_count(cls):
+        return f"Utworzono {cls.count} pizz"
+
+    # 3. @classmethod jako "alternatywny konstruktor"
+    @classmethod
+    def create_margherita(cls):
+        """Tworzy Margheritę - cls to klasa Pizza."""
+        return cls("Margherita", 25.0)  # cls(...) = Pizza(...)
+```
+
+**Użycie:**
+
+```python
+# Zwykła metoda - wywołujemy na INSTANCJI
+p1 = Pizza("Pepperoni", 30)
+print(p1.describe())  # "Pepperoni: 30 zł"
+
+# @classmethod - wywołujemy na KLASIE
+print(Pizza.get_count())  # "Utworzono 1 pizz"
+
+# Alternatywny konstruktor - tworzymy obiekt bez podawania argumentów
+p2 = Pizza.create_margherita()
+print(p2.name)  # "Margherita"
+```
+
+**Kluczowe różnice:**
+
+| Typ metody | Pierwszy argument | Wywołanie | Po co? |
+|------------|------------------|-----------|--------|
+| Zwykła | `self` (instancja) | `obiekt.metoda()` | Operacje na konkretnym obiekcie |
+| `@classmethod` | `cls` (klasa) | `Klasa.metoda()` | Alternatywne konstruktory, operacje na klasie |
+| `@staticmethod` | brak | `Klasa.metoda()` | Funkcje pomocnicze (rzadko używane) |
+
+**Dlaczego `cls` a nie `Pizza`?**
+
+```python
+@classmethod
+def create_margherita(cls):
+    return cls("Margherita", 25.0)  # Używamy cls, nie Pizza!
+```
+
+Dzięki `cls` metoda działa też w klasach dziedziczących:
+
+```python
+class PremiumPizza(Pizza):
+    pass
+
+p = PremiumPizza.create_margherita()  # Tworzy PremiumPizza, nie Pizza!
+```
+
 ### Serializacja obiektów
 
 Obiekty Pythona nie są bezpośrednio serializowalne. Potrzebujemy metod pomocniczych:
